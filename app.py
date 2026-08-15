@@ -1,10 +1,10 @@
 import os
 from flask import Flask, request, render_template, redirect, url_for, send_file, jsonify
 from werkzeug.utils import secure_filename
-from json_reader import read_json_from_fileobj
-from json_formatter import format_for_analytics
-from analyzer import create_graphs
-from report_generator import generate_conclusion_and_pdf
+from json_to_graphix.json_reader import read_json_from_fileobj
+from json_to_graphix.json_formatter import format_for_analytics
+from json_to_graphix.analyzer import create_graphs
+from json_to_graphix.report_generator import generate_conclusion_and_pdf, ai_continue_json
 import io
 import json
 from pathlib import Path
@@ -71,6 +71,45 @@ def analyze():
         columns=columns,
         upload_filename=filename,
     )
+
+
+
+@app.route("/create_json", methods=["GET"]) 
+def create_json_form():
+    return render_template("create_json.html")
+
+
+@app.route("/create_json", methods=["POST"]) 
+def create_json():
+    payload = request.form.get("content", "")
+    lines = [l for l in payload.splitlines() if l.strip()]
+    if len(lines) < 3:
+        return render_template("create_json.html", error="Please provide at least 3 non-empty lines as a starting point.")
+
+    existing = "\n".join(lines)
+    ai_out = ai_continue_json(existing, try_ollama=True)
+
+    if not ai_out:
+        # fallback: just wrap lines into array of strings
+        result_text = "[\n" + ",\n".join([json.dumps(l) for l in lines]) + "\n]"
+    else:
+        result_text = ai_out
+
+    # Try to parse and pretty-print
+    try:
+        parsed = json.loads(result_text)
+        pretty = json.dumps(parsed, indent=2, ensure_ascii=False)
+    except Exception:
+        pretty = result_text
+
+    # Save to uploads
+    os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
+    fname = f"created_{int(Path().stat().st_mtime)}.json"
+    save_path = os.path.join(app.config["UPLOAD_FOLDER"], fname)
+    with open(save_path, "w", encoding="utf-8") as f:
+        f.write(pretty)
+
+    return render_template("create_json.html", result_path=os.path.relpath(save_path, ".").replace(os.path.sep, "/"), pretty=pretty)
 
 
 @app.route("/download_grouped/<upload_filename>")

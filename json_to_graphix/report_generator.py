@@ -1,15 +1,15 @@
 import io
 import json
 import subprocess
+import os
 from typing import Any, Optional
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
+import requests
 
 
 def call_ollama(prompt: str, model: str = "tinyllama") -> Optional[str]:
-    """Attempt to call local Ollama CLI to generate text. Returns None on failure."""
     try:
-        # Use ollama CLI if available: `ollama generate --model <model> --prompt '<prompt>'`
         proc = subprocess.run(
             ["ollama", "generate", "--model", model, "--prompt", prompt],
             capture_output=True,
@@ -37,15 +37,48 @@ def _prompt_for_graph_explanation(desc: str, stats_text: str) -> str:
     )
 
 
-def generate_conclusion_and_pdf(summary_text: str, out_path: str, graph_infos=None, try_ollama: bool = True) -> str:
-    """Generate conclusion text and a PDF that includes graphs and explanations.
+def ai_continue_json(existing_text: str, try_ollama: bool = True, max_tokens: int = 512) -> Optional[str]:
+    """Try to continue a user-provided JSON fragment into valid JSON using local Ollama or OpenAI (if API key set).
+    Returns the text continuation (ideally full JSON) or None."""
+    prompt = (
+        "Continue and complete the JSON below so it becomes valid JSON data. "
+        "Do not add any prose, just output the JSON. If the input is a fragment, finish it as a JSON array or object as appropriate.\n\n"
+        + existing_text
+    )
 
-    graph_infos: list of dicts with keys 'path', 'desc', 'type', 'column', 'stats'
-    Returns the overall conclusion text.
-    """
+    if try_ollama:
+        out = call_ollama(prompt)
+        if out:
+            return out
+
+    # Try OpenAI via REST if API key present
+    api_key = os.environ.get("OPENAI_API_KEY")
+    if api_key:
+        try:
+            url = "https://api.openai.com/v1/chat/completions"
+            headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+            body = {
+                "model": "gpt-3.5-turbo",
+                "messages": [
+                    {"role": "system", "content": "You are a helpful assistant that completes JSON fragments."},
+                    {"role": "user", "content": prompt},
+                ],
+                "max_tokens": max_tokens,
+                "temperature": 0.2,
+            }
+            resp = requests.post(url, headers=headers, json=body, timeout=20)
+            if resp.ok:
+                j = resp.json()
+                return j["choices"][0]["message"]["content"].strip()
+        except Exception:
+            pass
+
+    return None
+
+
+def generate_conclusion_and_pdf(summary_text: str, out_path: str, graph_infos=None, try_ollama: bool = True) -> str:
     graph_infos = graph_infos or []
 
-    # First, get an overall conclusion
     text = None
     if try_ollama:
         prompt = build_prompt_from_summary(summary_text)
@@ -54,7 +87,6 @@ def generate_conclusion_and_pdf(summary_text: str, out_path: str, graph_infos=No
     if not text:
         text = "Conclusion:\n" + summary_text + "\n\nSuggested next steps: review anomalies, visualize further, and validate with domain experts."
 
-    # For each graph, get an explanation
     explanations = []
     for g in graph_infos:
         stats_text = ""
@@ -68,7 +100,6 @@ def generate_conclusion_and_pdf(summary_text: str, out_path: str, graph_infos=No
             p = _prompt_for_graph_explanation(g.get("desc", ""), stats_text)
             exp = call_ollama(p)
         if not exp:
-            # Fallback: simple templated explanation
             if g.get("type") in ("hist", "box", "scatter"):
                 st = g.get("stats", {})
                 exp = f"{g.get('desc')}. Count={st.get('count', 'N/A')}, mean={st.get('mean', 'N/A')}, median={st.get('median', 'N/A')}."
@@ -81,7 +112,6 @@ def generate_conclusion_and_pdf(summary_text: str, out_path: str, graph_infos=No
 
         explanations.append(exp)
 
-    # Build PDF with images and explanations
     c = canvas.Canvas(out_path, pagesize=letter)
     width, height = letter
     margin = 40
@@ -98,7 +128,6 @@ def generate_conclusion_and_pdf(summary_text: str, out_path: str, graph_infos=No
         c.drawString(margin, y, line[:1000])
         y -= 14
 
-    # Add graphs with explanations
     for idx, g in enumerate(graph_infos):
         img_path = g.get("path")
         desc = g.get("desc", "")
@@ -111,14 +140,12 @@ def generate_conclusion_and_pdf(summary_text: str, out_path: str, graph_infos=No
         c.drawString(margin, y, desc[:200])
         y -= 16
 
-        # Draw image if present
         try:
             iw = width - margin * 2
             ih = 160
             c.drawImage(img_path, margin, y - ih, width=iw, height=ih, preserveAspectRatio=True)
             y -= ih + 6
         except Exception:
-            # leave space if image can't be drawn
             y -= 6
 
         c.setFont("Helvetica", 10)

@@ -9,9 +9,13 @@
   <body>
     <div class="card" style="max-width:720px;margin:24px auto;">
       <h1>Upload JSON for Analytics</h1>
+      <p class="muted">Select a JSON file to analyze or create a new one from scratch.</p>
       <form action="/analyze" method="post" enctype="multipart/form-data">
         <input type="file" name="file" accept="application/json" />
-        <button type="submit">Analyze</button>
+        <div style="margin-top:12px;display:flex;gap:8px;align-items:center">
+          <button type="submit">Analyze</button>
+          <a href="/create_json" class="chip">Create JSON</a>
+        </div>
       </form>
     </div>
   </body>

@@ -1,0 +1,36 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Create JSON</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+  </head>
+  <body>
+    <header>
+      <h1>Create JSON</h1>
+      <div class="actions"><a href="/" class="chip">Back</a></div>
+    </header>
+
+    <div class="card" style="max-width:900px;margin:18px auto">
+      <p class="muted">Provide at least three lines of content. The AI will try to continue and produce valid JSON. You can edit the result before downloading.</p>
+      {% if error %}
+        <div class="card" style="background:rgba(255,50,50,0.06);border-color:rgba(255,50,50,0.1)">{{ error }}</div>
+      {% endif %}
+      <form method="post">
+        <textarea name="content" rows="8" placeholder="Enter example records or JSON fragment here">{% if pretty %}{{ pretty }}{% endif %}</textarea>
+        <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
+          <button type="submit">Generate JSON</button>
+          {% if result_path %}
+            <a href="/{{ result_path }}" class="chip">Download created JSON</a>
+          {% endif %}
+        </div>
+      </form>
+
+      {% if pretty %}
+        <h3 style="margin-top:18px">Resulting JSON</h3>
+        <pre class="card" style="white-space:pre-wrap;overflow:auto;max-height:400px">{{ pretty }}</pre>
+      {% endif %}
+    </div>
+  </body>
+</html>

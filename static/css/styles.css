@@ -37,3 +37,12 @@ label{color:var(--muted);margin-right:8px}
 /* small helpers */
 .muted{color:var(--muted)}
 .chip{display:inline-block;padding:6px 10px;border-radius:999px;background:var(--glass);border:1px solid rgba(255,255,255,0.02);color:var(--muted);font-size:13px}
+
+textarea{name:var(--font-family,Inter);width:100%;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:rgba(255,255,255,0.02);color:inherit;min-height:120px}
+input[type=file]{padding:8px;background:transparent;border-radius:8px}
+form{margin-top:8px}
+header{margin-bottom:22px}
+
+.card pre{background:transparent;border:0;padding:12px;color:var(--muted);overflow:auto}
+
+.muted{color:var(--muted)}

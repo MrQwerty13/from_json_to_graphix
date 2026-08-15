@@ -1,9 +1,9 @@
 import os
 import traceback
-from json_reader import read_json
-from json_formatter import format_for_analytics
-from analyzer import create_graphs
-from report_generator import generate_conclusion_and_pdf
+from json_to_graphix.json_reader import read_json
+from json_to_graphix.json_formatter import format_for_analytics
+from json_to_graphix.analyzer import create_graphs
+from json_to_graphix.report_generator import generate_conclusion_and_pdf
 
 
 def main():
