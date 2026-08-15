@@ -1,0 +1,18 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Upload JSON for Analysis</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+  </head>
+  <body>
+    <div class="card" style="max-width:720px;margin:24px auto;">
+      <h1>Upload JSON for Analytics</h1>
+      <form action="/analyze" method="post" enctype="multipart/form-data">
+        <input type="file" name="file" accept="application/json" />
+        <button type="submit">Analyze</button>
+      </form>
+    </div>
+  </body>
+</html>

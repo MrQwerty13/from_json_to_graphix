@@ -1,0 +1,43 @@
+Summary of changes made to the project (json-graphix-analitic)
+
+Files added:
+- `json_reader.py` - JSON loading helpers
+- `json_formatter.py` - normalize/flatten JSON and write `formatted.csv` and `formatted.json`
+- `analyzer.py` - produce multiple graphs (histogram, boxplot, scatter, bar) and compute stats
+- `report_generator.py` - create PDF reports, embed graphs, request per-graph explanations (tries Ollama CLI, falls back to templated text)
+- `app.py` - Flask app: upload, analyze, group-download, generate PDF endpoints and web UI
+- `templates/upload.html`, `templates/result.html` - improved, responsive UI with JS actions
+- `requirements.txt` - dependencies
+- `README.md` - run instructions
+- `sample_data.json`, `run_test.py` - test data and runner
+
+Key behavior implemented:
+- Read uploaded JSON, normalize into tabular form for analytics
+- Generate multiple informative visualizations (up to 3 numeric and 3 categorical columns)
+- Provide download of grouped JSON by chosen field
+- Generate a PDF report including images and per-graph explanations (uses `ollama` CLI when available)
+- Friendly UI with CSS/JS for grouping and report generation
+
+Testing performed:
+- Ran `run_test.py` locally; it produced `static/outputs/sample_data.json/formatted.csv`, PNG graphs, and `report.pdf`.
+
+How to run locally:
+1. Create & activate venv (optional):
+   python3 -m venv .venv
+   source .venv/bin/activate
+2. Install dependencies:
+   python3 -m pip install -r requirements.txt
+3. Run the app:
+   python3 app.py
+4. Or run the test script to exercise the pipeline:
+   python3 run_test.py
+
+Notes / Next steps you may want:
+- Provide a system `ollama` installation for AI-powered explanations.
+- Improve UI styling/themes and responsive layout further.
+- Add unit tests and CI checks for linting and runtime imports.
+
+If you want, I can now:
+- run the Flask app and perform an interactive upload test,
+- wire Ollama with an API instead of CLI,
+- or continue polishing visual design.

@@ -1,0 +1,7 @@
+[
+  {"id": 1, "category": "A", "value": 10, "score": 0.8},
+  {"id": 2, "category": "B", "value": 15, "score": 0.6},
+  {"id": 3, "category": "A", "value": 7, "score": 0.9},
+  {"id": 4, "category": "C", "value": 20, "score": 0.3},
+  {"id": 5, "category": "B", "value": 13, "score": 0.5}
+]

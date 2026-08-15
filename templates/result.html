@@ -1,0 +1,73 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Analysis Result</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+  </head>
+  <body>
+    <header>
+      <h1>Analysis Result</h1>
+      <div class="actions">
+        <a href="/" class="chip">Upload another file</a>
+      </div>
+    </header>
+
+    <div class="card">
+      <strong style="color:var(--accent-2)">Formatted files:</strong>
+      <div style="margin-top:8px"><a href="/{{ csv_path }}">Formatted CSV</a> · <a href="/{{ json_path }}">Pretty JSON</a></div>
+    </div>
+
+    <div class="card">
+      <strong style="color:var(--accent-1)">Group & Download</strong>
+      <div style="margin-top:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <label for="group_by">Group by field:</label>
+        <select id="group_by">
+          <option value="">-- choose field --</option>
+          {% for c in columns %}
+            <option value="{{ c }}">{{ c }}</option>
+          {% endfor %}
+        </select>
+        <button id="download_grouped">Download grouped JSON</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <strong style="color:var(--accent-3)">Generate PDF Conclusion</strong>
+      <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
+        <button id="gen_report">Generate PDF Report</button>
+        <span id="report_status" class="muted" style="margin-left:12px"></span>
+      </div>
+    </div>
+
+    <h2 style="color:var(--muted)">Generated Graphs</h2>
+    <div class="graphs">
+    {% for src, desc in graphs %}
+      <div class="graph card">
+        <h4 style="margin-top:0;color:var(--accent-2)">{{ desc }}</h4>
+        <img src="/static/{{ src }}" alt="{{ desc }}" />
+      </div>
+    {% endfor %}
+    </div>
+
+    <script>
+      const uploadName = '{{ upload_filename }}'
+      document.getElementById('download_grouped').addEventListener('click', () => {
+        const field = document.getElementById('group_by').value
+        if (!field) { alert('Choose a field to group by'); return }
+        const url = `/download_grouped/${uploadName}?group_by=${encodeURIComponent(field)}`
+        window.location = url
+      })
+
+      document.getElementById('gen_report').addEventListener('click', async () => {
+        const status = document.getElementById('report_status')
+        status.textContent = 'Generating...'
+        const res = await fetch(`/generate_report/${uploadName}`)
+        if (!res.ok) { status.textContent = 'Error generating report'; return }
+        const body = await res.json()
+        status.innerHTML = `Report ready: <a href="/${body.pdf}" target="_blank">Open PDF</a>`
+      })
+    </script>
+  </body>
+</html>

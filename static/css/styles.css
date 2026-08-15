@@ -1,0 +1,39 @@
+:root{
+  --bg: #0f1724;
+  --card: #0b1220;
+  --muted: #9aa6b2;
+  --accent-1: #7c3aed; /* purple */
+  --accent-2: #06b6d4; /* cyan */
+  --accent-3: #f97316; /* orange */
+  --glass: rgba(255,255,255,0.03);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial;
+  background: linear-gradient(180deg, #071024 0%, #0b1220 60%);
+  color:#e6eef6;
+  padding:24px;
+}
+header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+h1{margin:0;font-weight:600;color:var(--accent-1)}
+.card{background:linear-gradient(180deg,var(--card), rgba(11,18,32,0.8));border:1px solid rgba(255,255,255,0.04);padding:18px;border-radius:12px;box-shadow:0 6px 18px rgba(2,6,23,0.6)}
+.card p, .card div{color:var(--muted)}
+.graphs{display:flex;flex-wrap:wrap;gap:18px}
+.graph{width:360px}
+.graph img{width:100%;height:auto;border-radius:8px;border:1px solid rgba(255,255,255,0.04);box-shadow:0 6px 20px rgba(2,6,23,0.6)}
+.actions{display:flex;gap:8px;align-items:center}
+button, select, input[type=file]{background:linear-gradient(90deg,var(--accent-2),var(--accent-1));border:0;color:#031025;padding:8px 12px;border-radius:10px;cursor:pointer;font-weight:600}
+button.secondary{background:linear-gradient(90deg,var(--accent-3),#f43f5e);color:white}
+a{color:var(--accent-2);text-decoration:none}
+label{color:var(--muted);margin-right:8px}
+/* responsive */
+@media (max-width:900px){
+  .graphs{flex-direction:column}
+  .graph{width:100%}
+}
+
+/* small helpers */
+.muted{color:var(--muted)}
+.chip{display:inline-block;padding:6px 10px;border-radius:999px;background:var(--glass);border:1px solid rgba(255,255,255,0.02);color:var(--muted);font-size:13px}
